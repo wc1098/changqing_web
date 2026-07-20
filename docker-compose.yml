@@ -29,6 +29,7 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - DATABASE_URI=postgresql://${POSTGRES_USER:-changqing}:${POSTGRES_PASSWORD:-changqing}@postgres:5432/${POSTGRES_DB:-changqing}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-changqing}:${POSTGRES_PASSWORD:-changqing}@postgres:5432/${POSTGRES_DB:-changqing}
       - PAYLOAD_SECRET=${PAYLOAD_SECRET:-changqing-production-secret-change-me}
       - NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL:-http://localhost:3000}
     depends_on:
