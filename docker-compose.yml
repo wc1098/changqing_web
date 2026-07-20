@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: changqing-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-changqing}
+      POSTGRES_USER: ${POSTGRES_USER:-changqing}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changqing}
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./data-base/data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-changqing} -d ${POSTGRES_DB:-changqing}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: changqing-web
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URI=postgresql://${POSTGRES_USER:-changqing}:${POSTGRES_PASSWORD:-changqing}@postgres:5432/${POSTGRES_DB:-changqing}
+      - PAYLOAD_SECRET=${PAYLOAD_SECRET:-changqing-production-secret-change-me}
+      - NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL:-http://localhost:3000}
+    depends_on:
+      postgres:
+        condition: service_healthy
