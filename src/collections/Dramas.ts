@@ -46,6 +46,22 @@ export const Dramas: CollectionConfig = {
     update: ({ req: { user } }) => !!user && user.collection === 'admins',
     delete: ({ req: { user } }) => !!user && user.collection === 'admins',
   },
+  hooks: {
+    beforeDelete: [
+      async ({ req, id }) => {
+        // 自动删除该剧集所关联的所有分集，避免触发 PostgreSQL 字段 NOT NULL 依赖校验失败
+        await req.payload.delete({
+          collection: 'episodes',
+          where: {
+            drama: {
+              equals: id,
+            },
+          },
+          req,
+        })
+      },
+    ],
+  },
   fields: [
     {
       name: 'code',

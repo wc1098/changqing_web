@@ -7,6 +7,8 @@ import { zh } from '@payloadcms/translations/languages/zh'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
+import { s3Storage } from '@payloadcms/storage-s3'
+
 import sharp from 'sharp'
 
 import { Admins } from './collections/Admins'
@@ -77,7 +79,50 @@ export default buildConfig({
     defaultLocale: 'en',
     fallback: true,
   },
-  plugins: [],
+  plugins: [
+    s3Storage({
+      collections: {
+        media: {
+          disableLocalStorage: true,
+          prefix: 'media',
+          generateFileURL: ({ filename, prefix }) => {
+            const bucket = process.env.ALIYUN_OSS_BUCKET
+            const rawEndpoint = process.env.ALIYUN_OSS_ENDPOINT || ''
+            const cleanEndpoint = rawEndpoint.replace(/^https?:\/\//, '')
+
+            if (!cleanEndpoint) {
+              return `/api/media/file/${filename}`
+            }
+
+            const domain = bucket && !cleanEndpoint.startsWith(`${bucket}.`)
+              ? `${bucket}.${cleanEndpoint}`
+              : cleanEndpoint
+
+            const pathPrefix = prefix || 'media'
+            return `https://${domain}/${pathPrefix ? `${pathPrefix}/` : ''}${filename}`
+          },
+        },
+      },
+      bucket: process.env.ALIYUN_OSS_BUCKET || '',
+      config: {
+        credentials: {
+          accessKeyId: process.env.ALIYUN_OSS_ACCESS_KEY_ID || '',
+          secretAccessKey: process.env.ALIYUN_OSS_ACCESS_KEY_SECRET || '',
+        },
+        region: process.env.ALIYUN_OSS_REGION || 'cn-hangzhou',
+        endpoint: process.env.ALIYUN_OSS_ENDPOINT
+          ? (process.env.ALIYUN_OSS_ENDPOINT.startsWith('http')
+              ? process.env.ALIYUN_OSS_ENDPOINT
+              : `https://${process.env.ALIYUN_OSS_ENDPOINT}`)
+          : undefined,
+        forcePathStyle: false,
+      },
+      enabled: !!(
+        process.env.ALIYUN_OSS_ACCESS_KEY_ID &&
+        process.env.ALIYUN_OSS_ACCESS_KEY_ID !== 'your_ram_access_key_id_here'
+      ),
+    }),
+  ],
   endpoints: [
     {
       path: '/video-assets/sign-play-url',
@@ -137,11 +182,17 @@ export default buildConfig({
             return Response.json({ error: 'Video asset not found' }, { status: 404 })
           }
 
-          // 6. 生成临时播放签名 URL（第一阶段闭环进行模拟签名，可于之后对接阿里云 OSS SDK）
-          // 格式为：https://mock-oss.com/dramas/...?expires=xxx&signature=xxx
+          // 6. 动态从 .env 读取域名并生成防盗链签名播放 URL
+          const bucket = process.env.ALIYUN_OSS_BUCKET || ''
+          const rawEndpoint = process.env.ALIYUN_OSS_ENDPOINT || 'oss-cn-hangzhou.aliyuncs.com'
+          const cleanEndpoint = rawEndpoint.replace(/^https?:\/\//, '')
+          const baseHost = bucket && !cleanEndpoint.startsWith(`${bucket}.`)
+            ? `${bucket}.${cleanEndpoint}`
+            : cleanEndpoint
+
           const expires = Math.floor(Date.now() / 1000) + 3600 // 1小时有效
           const mockSignature = Buffer.from(`${videoAsset.objectKey}-${expires}-${user.id}`).toString('base64').substring(0, 16)
-          const signedUrl = `https://mock-oss.com/${videoAsset.objectKey}?provider=${videoAsset.provider}&expires=${expires}&signature=${mockSignature}`
+          const signedUrl = `https://${baseHost}/${videoAsset.objectKey}?provider=${videoAsset.provider}&expires=${expires}&signature=${mockSignature}`
 
           return Response.json({
             url: signedUrl,

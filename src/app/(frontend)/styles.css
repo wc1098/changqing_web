@@ -159,14 +159,20 @@ a {
 }
 
 .section-subtitle {
-  color: var(--muted);
-  font-size: 16px;
-  max-width: 600px;
+  color: #ffffff;
+  font-size: 18px;
+  line-height: 1.6;
+  max-width: 720px;
 }
 
-.section-subtitle.max-w-700 {
-  max-width: 700px;
+.section-header.centered .section-subtitle {
   margin-inline: auto;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 500;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  margin-top: 8px;
 }
 
 /* -----------------------------------------
@@ -186,6 +192,13 @@ a {
   display: flex;
   align-items: center;
   gap: 14px;
+}
+
+.brand-logo-img {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 4px;
 }
 
 .brand-mark {
@@ -604,10 +617,68 @@ a {
 }
 
 .drama-card-footer {
-  border-top: 1px solid rgba(212, 173, 98, 0.1);
-  padding-top: 14px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
   font-size: 12px;
   color: var(--muted);
+}
+
+/* Pagination System */
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 40px;
+  padding-top: 20px;
+}
+
+.pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pagination-btn,
+.pagination-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #d1d5db;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.pagination-num {
+  min-width: 38px;
+  padding: 8px 12px;
+}
+
+.pagination-btn:hover:not(.disabled),
+.pagination-num:hover:not(.active) {
+  color: #fff;
+  border-color: rgba(212, 175, 55, 0.5);
+  background: rgba(212, 175, 55, 0.1);
+}
+
+.pagination-num.active {
+  color: #0b0f19;
+  background: var(--gold, #d4af37);
+  border-color: var(--gold, #d4af37);
+  font-weight: 600;
+}
+
+.pagination-btn.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .drama-card-footer strong {

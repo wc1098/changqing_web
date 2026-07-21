@@ -6,6 +6,7 @@ import { usePathname, useParams } from 'next/navigation'
 
 const translations = {
   en: {
+    home: 'Home',
     about: 'About Us',
     services: 'Services',
     dramas: 'Drama Library',
@@ -13,6 +14,7 @@ const translations = {
     contact: 'Contact Us',
   },
   zh: {
+    home: '首页',
     about: '关于我们',
     services: '业务服务',
     dramas: '精品作品库',
@@ -20,6 +22,7 @@ const translations = {
     contact: '联系我们',
   },
   ar: {
+    home: 'الرئيسية',
     about: 'من نحن',
     services: 'خدماتنا',
     dramas: 'مكتبة الأعمال',
@@ -27,6 +30,7 @@ const translations = {
     contact: 'اتصل بنا',
   },
   tr: {
+    home: 'Ana Sayfa',
     about: 'Hakkımızda',
     services: 'Hizmetlerimiz',
     dramas: 'Dizi Kütüphanesi',
@@ -59,7 +63,11 @@ export default function Header() {
   return (
     <header className="nav">
       <Link className="brand" href={`/${locale}`}>
-        <span className="brand-mark">EV</span>
+        <img 
+          src="/icons/icon-192.png" 
+          alt="Eastern Vision Logo" 
+          className="brand-logo-img" 
+        />
         <span>
           <strong>
             {locale === 'zh' ? '东方视野影业' :
@@ -72,6 +80,7 @@ export default function Header() {
       </Link>
       
       <nav aria-label="main navigation" className="nav-links">
+        <Link href={`/${locale}`}>{t.home}</Link>
         <Link href={`/${locale}/about`}>{t.about}</Link>
         <Link href={`/${locale}/services`}>{t.services}</Link>
         <Link href={`/${locale}/dramas`}>{t.dramas}</Link>

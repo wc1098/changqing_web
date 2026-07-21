@@ -12,6 +12,12 @@ const translations = {
     rights: 'All rights reserved.',
     privacy: 'Privacy Policy',
     terms: 'Terms of Service',
+    home: 'Home',
+    about: 'About Us',
+    services: 'Services',
+    dramas: 'Drama Library',
+    news: 'News',
+    contact: 'Contact Us',
   },
   zh: {
     address: '阿联酋迪拜硅谷绿洲 DDP A2栋',
@@ -20,6 +26,12 @@ const translations = {
     rights: '版权所有。',
     privacy: '隐私政策',
     terms: '服务条款',
+    home: '首页',
+    about: '关于我们',
+    services: '业务服务',
+    dramas: '精品作品库',
+    news: '新闻动态',
+    contact: '联系我们',
   },
   ar: {
     address: 'واحة دبي للسيليكون، مبنى A2، دبي، الإمارات العربية المتحدة',
@@ -28,6 +40,12 @@ const translations = {
     rights: 'جميع الحقوق محفوظة.',
     privacy: 'سياسة الخصوصية',
     terms: 'شروط الخدمة',
+    home: 'الرئيسية',
+    about: 'من نحن',
+    services: 'خدماتنا',
+    dramas: 'مكتبة الأعمال',
+    news: 'الأخبار',
+    contact: 'اتصل بنا',
   },
   tr: {
     address: 'Dubai Silicon Oasis, DDP, A2 Binası, Dubai, BAE',
@@ -36,6 +54,12 @@ const translations = {
     rights: 'Tüm hakları saklıdır.',
     privacy: 'Gizlilik Politikası',
     terms: 'Kullanım Koşulları',
+    home: 'Ana Sayfa',
+    about: 'Hakkımızda',
+    services: 'Hizmetlerimiz',
+    dramas: 'Dizi Kütüphanesi',
+    news: 'Haberler',
+    contact: 'İletişim',
   },
 }
 
@@ -59,15 +83,12 @@ export default function Footer() {
           <p>{t.phone}</p>
         </div>
         <div className="footer-links">
-          <Link href={`/${locale}/about`}>
-            {locale === 'zh' ? '关于我们' : locale === 'ar' ? 'من نحن' : locale === 'tr' ? 'Hakkımızda' : 'About'}
-          </Link>
-          <Link href={`/${locale}/services`}>
-            {locale === 'zh' ? '服务' : locale === 'ar' ? 'خدمات' : locale === 'tr' ? 'Hizmetler' : 'Services'}
-          </Link>
-          <Link href={`/${locale}/dramas`}>
-            {locale === 'zh' ? '作品' : locale === 'ar' ? 'أعمال' : locale === 'tr' ? 'Diziler' : 'Dramas'}
-          </Link>
+          <Link href={`/${locale}`}>{t.home}</Link>
+          <Link href={`/${locale}/about`}>{t.about}</Link>
+          <Link href={`/${locale}/services`}>{t.services}</Link>
+          <Link href={`/${locale}/dramas`}>{t.dramas}</Link>
+          <Link href={`/${locale}/news`}>{t.news}</Link>
+          <Link href={`/${locale}/contact`}>{t.contact}</Link>
         </div>
       </div>
       <div className="footer-bottom">

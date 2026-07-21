@@ -23,6 +23,8 @@ const translations = {
     status: 'Published',
     emptyList: 'No dramas match your current selection filter. Try clearing some filters.',
     clearFilters: 'Clear Filters',
+    prevPage: 'Previous',
+    nextPage: 'Next',
   },
   zh: {
     title: '精品短剧作品库',
@@ -44,6 +46,8 @@ const translations = {
     status: '已发布',
     emptyList: '暂无符合当前筛选条件的短剧。请尝试调整筛选选项。',
     clearFilters: '重置筛选',
+    prevPage: '上一页',
+    nextPage: '下一页',
   },
   ar: {
     title: 'مكتبة الأعمال الدرامية',
@@ -65,6 +69,8 @@ const translations = {
     status: 'منشور',
     emptyList: 'لا توجد أعمال تطابق خيارات التصفية الحالية. يرجى تجربة إعادة ضبط التصفية.',
     clearFilters: 'إعادة ضبط التصفية',
+    prevPage: 'السابق',
+    nextPage: 'التالي',
   },
   tr: {
     title: 'Dizi İçerik Kütüphanesi',
@@ -86,6 +92,8 @@ const translations = {
     status: 'Yayınlandı',
     emptyList: 'Seçtiğiniz filtrelere uygun dizi bulunamadı. Filtreleri sıfırlamayı deneyin.',
     clearFilters: 'Filtreleri Temizle',
+    prevPage: 'Önceki',
+    nextPage: 'Sonraki',
   },
 }
 
@@ -98,6 +106,7 @@ export default async function DramasPage(props: {
     platform?: string
     episodes?: string
     sort?: string
+    page?: string
   }>
 }) {
   const { locale } = await props.params
@@ -109,6 +118,7 @@ export default async function DramasPage(props: {
   const activePlatformCode = searchParams.platform || ''
   const activeEpRange = searchParams.episodes || ''
   const activeSort = searchParams.sort || '-releaseDate'
+  const currentPage = Math.max(1, parseInt(searchParams.page || '1', 10))
 
   const t = translations[locale as keyof typeof translations] || translations.en
 
@@ -122,16 +132,16 @@ export default async function DramasPage(props: {
   let platforms: any[] = []
 
   try {
-    const genresRes = await payload.find({ collection: 'genres', limit: 100 })
+    const genresRes = await payload.find({ collection: 'genres', locale: locale as any, limit: 100 })
     genres = genresRes.docs
 
-    const langsRes = await payload.find({ collection: 'languages', limit: 100 })
+    const langsRes = await payload.find({ collection: 'languages', locale: locale as any, limit: 100 })
     languages = langsRes.docs
 
-    const marketsRes = await payload.find({ collection: 'markets', limit: 100 })
+    const marketsRes = await payload.find({ collection: 'markets', locale: locale as any, limit: 100 })
     markets = marketsRes.docs
 
-    const platformsRes = await payload.find({ collection: 'platforms', limit: 100 })
+    const platformsRes = await payload.find({ collection: 'platforms', locale: locale as any, limit: 100 })
     platforms = platformsRes.docs
   } catch (error) {
     console.error('Error prefetching filters:', error)
@@ -174,8 +184,13 @@ export default async function DramasPage(props: {
     }
   }
 
-  // 3. Fetch matching dramas
+  // 3. Fetch matching dramas with pagination
   let dramas: any[] = []
+  let totalPages = 1
+  let totalDocs = 0
+  let hasPrevPage = false
+  let hasNextPage = false
+
   try {
     const dramasRes = await payload.find({
       collection: 'dramas',
@@ -184,9 +199,14 @@ export default async function DramasPage(props: {
         and: queryConditions
       },
       sort: activeSort as any,
-      limit: 100,
+      limit: 12,
+      page: currentPage,
     })
     dramas = dramasRes.docs
+    totalPages = dramasRes.totalPages || 1
+    totalDocs = dramasRes.totalDocs || 0
+    hasPrevPage = dramasRes.hasPrevPage || false
+    hasNextPage = dramasRes.hasNextPage || false
   } catch (error) {
     console.error('Error fetching filtered dramas:', error)
   }
@@ -208,6 +228,21 @@ export default async function DramasPage(props: {
     } else {
       params.set(key, value)
     }
+
+    const queryStr = params.toString()
+    return `/${locale}/dramas${queryStr ? '?' + queryStr : ''}`
+  }
+
+  // Helper to build page URL
+  const getPageUrl = (pageNum: number) => {
+    const params = new URLSearchParams()
+    if (activeGenreCode) params.set('genre', activeGenreCode)
+    if (activeLangCode) params.set('lang', activeLangCode)
+    if (activeMarketCode) params.set('market', activeMarketCode)
+    if (activePlatformCode) params.set('platform', activePlatformCode)
+    if (activeEpRange) params.set('episodes', activeEpRange)
+    if (activeSort && activeSort !== '-releaseDate') params.set('sort', activeSort)
+    if (pageNum > 1) params.set('page', pageNum.toString())
 
     const queryStr = params.toString()
     return `/${locale}/dramas${queryStr ? '?' + queryStr : ''}`
@@ -297,7 +332,7 @@ export default async function DramasPage(props: {
             <Link href={getFilterUrl('episodes', '11-30')} className={`filter-opt-btn ${activeEpRange === '11-30' ? 'active' : ''}`}>
               {t.epRange2}
             </Link>
-            <Link href={getFilterUrl('episodes', '30+')} className={`filter-opt-btn ${activeEpRange === '30+' ? 'active' : ''}`}>
+            <Link href={getFilterUrl('episodes', '30+')} className={`filter-opt-btn ${activeEpRange === '30+'} ? 'active' : ''`}>
               {t.epRange3}
             </Link>
           </div>
@@ -319,7 +354,7 @@ export default async function DramasPage(props: {
         {/* Clear Filters Option */}
         {(activeGenreCode || activeLangCode || activeMarketCode || activePlatformCode || activeEpRange) && (
           <div className="filter-summary-row">
-            <span>{dramas.length} {t.totalFound}</span>
+            <span>{totalDocs} {t.totalFound}</span>
             <Link href={`/${locale}/dramas`} className="clear-filters-btn">
               {t.clearFilters} ✕
             </Link>
@@ -329,39 +364,72 @@ export default async function DramasPage(props: {
 
       {/* Drama Card Grid */}
       {dramas.length > 0 ? (
-        <div className="drama-grid">
-          {dramas.map((drama) => (
-            <Link 
-              href={`/${locale}/dramas/${drama.id}`} 
-              key={drama.id} 
-              className="drama-card glass-panel"
-            >
-              <div className="drama-card-image-wrapper">
-                {drama.poster && typeof drama.poster === 'object' ? (
-                  <img 
-                    src={drama.poster.url || '/api/placeholder/400/600'} 
-                    alt={drama.title} 
-                    className="drama-card-img"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="drama-card-placeholder">
-                    <span>{drama.title.substring(0, 2)}</span>
-                  </div>
-                )}
-                <div className="drama-card-tag">{t.status}</div>
-              </div>
-              <div className="drama-card-content">
-                <span className="drama-card-code">{drama.code}</span>
-                <h3 className="drama-card-title">{drama.title}</h3>
-                <p className="drama-card-summary">{drama.summary}</p>
-                <div className="drama-card-footer">
-                  <span>{t.episodes}: <strong>{drama.episodeCount}</strong></span>
+        <>
+          <div className="drama-grid">
+            {dramas.map((drama) => (
+              <Link 
+                href={`/${locale}/dramas/${drama.id}`} 
+                key={drama.id} 
+                className="drama-card glass-panel"
+              >
+                <div className="drama-card-image-wrapper">
+                  {drama.poster && typeof drama.poster === 'object' ? (
+                    <img 
+                      src={drama.poster.url || '/api/placeholder/400/600'} 
+                      alt={drama.title} 
+                      className="drama-card-img"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="drama-card-placeholder">
+                      <span>{drama.title.substring(0, 2)}</span>
+                    </div>
+                  )}
+                  <div className="drama-card-tag">{t.status}</div>
                 </div>
+                <div className="drama-card-content">
+                  <span className="drama-card-code">{drama.code}</span>
+                  <h3 className="drama-card-title">{drama.title}</h3>
+                  <p className="drama-card-summary">{drama.summary}</p>
+                  <div className="drama-card-footer">
+                    <span>{t.episodes}: <strong>{drama.episodeCount}</strong></span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {/* Pagination Bar */}
+          {totalPages > 1 && (
+            <div className="pagination-bar">
+              <Link
+                href={hasPrevPage ? getPageUrl(currentPage - 1) : '#'}
+                className={`pagination-btn ${!hasPrevPage ? 'disabled' : ''}`}
+                tabIndex={hasPrevPage ? 0 : -1}
+              >
+                ← {t.prevPage}
+              </Link>
+              <div className="pagination-pages">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                  <Link
+                    key={p}
+                    href={getPageUrl(p)}
+                    className={`pagination-num ${p === currentPage ? 'active' : ''}`}
+                  >
+                    {p}
+                  </Link>
+                ))}
               </div>
-            </Link>
-          ))}
-        </div>
+              <Link
+                href={hasNextPage ? getPageUrl(currentPage + 1) : '#'}
+                className={`pagination-btn ${!hasNextPage ? 'disabled' : ''}`}
+                tabIndex={hasNextPage ? 0 : -1}
+              >
+                {t.nextPage} →
+              </Link>
+            </div>
+          )}
+        </>
       ) : (
         <div className="empty-state glass-panel centered-text">
           <p>{t.emptyList}</p>
