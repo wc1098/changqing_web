@@ -1,11 +1,13 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Payload, PayloadRequest, Where } from 'payload'
 
-const getDramaId = (drama: any): string | null => {
+const getDramaId = (drama: unknown): string | null => {
   if (!drama) return null
-  return typeof drama === 'object' ? drama.id : drama
+  return typeof drama === 'object' && drama !== null && 'id' in drama
+    ? String((drama as { id: unknown }).id)
+    : String(drama)
 }
 
-const updateEpisodeCount = async (dramaId: string, payload: any, req: any) => {
+const updateEpisodeCount = async (dramaId: string, payload: Payload, req: PayloadRequest) => {
   const result = await payload.find({
     collection: 'episodes',
     req,
@@ -73,7 +75,7 @@ export const Episodes: CollectionConfig = {
             },
           },
         ],
-      } as any
+      } as Where
     },
     create: ({ req: { user } }) => !!user && user.collection === 'admins',
     update: ({ req: { user } }) => !!user && user.collection === 'admins',
@@ -125,7 +127,9 @@ export const Episodes: CollectionConfig = {
         ar: 'رقم الحلقة',
         tr: 'Bölüm Numarası',
       },
-      validate: async (val: any, { siblingData, id, req }: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      validate: async (val: any, options: any) => {
+        const { siblingData, id, req } = options as { siblingData: Record<string, unknown>; id?: string | number; req: PayloadRequest }
         if (typeof val !== 'number') return 'Episode number must be a number'
         
         const dramaId = getDramaId(siblingData?.drama)

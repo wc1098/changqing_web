@@ -2,6 +2,21 @@
 
 import React, { useState, useEffect } from 'react'
 
+interface ClientUser {
+  id: string
+  email: string
+  company?: string
+  active?: boolean
+}
+
+interface SignedUrlData {
+  url: string
+  format?: string
+  duration?: number
+  provider?: string
+  transcodeStatus?: string
+}
+
 export default function ClientVerification({
   episodes,
 }: {
@@ -9,11 +24,11 @@ export default function ClientVerification({
 }) {
   const [email, setEmail] = useState('client-active@easternvision.com')
   const [password, setPassword] = useState('password123')
-  const [currentUser, setCurrentUser] = useState<any>(null)
+  const [currentUser, setCurrentUser] = useState<ClientUser | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [selectedEpisode, setSelectedEpisode] = useState('')
-  const [signedUrlData, setSignedUrlData] = useState<any>(null)
+  const [selectedEpisode, setSelectedEpisode] = useState(() => episodes[0]?.id || '')
+  const [signedUrlData, setSignedUrlData] = useState<SignedUrlData | null>(null)
 
   // 检查当前登录状态
   const checkLoginStatus = async () => {
@@ -35,9 +50,36 @@ export default function ClientVerification({
   }
 
   useEffect(() => {
-    checkLoginStatus()
+    let isMounted = true
+    const fetchStatus = async () => {
+      try {
+        const res = await fetch('/api/clients/me')
+        if (res.ok) {
+          const data = await res.json()
+          if (isMounted) {
+            setCurrentUser(data?.user || null)
+          }
+        } else if (isMounted) {
+          setCurrentUser(null)
+        }
+      } catch {
+        if (isMounted) {
+          setCurrentUser(null)
+        }
+      }
+    }
+
+    fetchStatus()
     if (episodes.length > 0) {
-      setSelectedEpisode(episodes[0].id)
+      setTimeout(() => {
+        if (isMounted) {
+          setSelectedEpisode(episodes[0].id)
+        }
+      }, 0)
+    }
+
+    return () => {
+      isMounted = false
     }
   }, [episodes])
 
@@ -66,8 +108,8 @@ export default function ClientVerification({
       }
 
       await checkLoginStatus()
-    } catch (err: any) {
-      setError(err.message || '网络错误')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '网络错误')
     } finally {
       setLoading(false)
     }
@@ -81,7 +123,7 @@ export default function ClientVerification({
     try {
       await fetch('/api/clients/logout', { method: 'POST' })
       setCurrentUser(null)
-    } catch (err: any) {
+    } catch {
       setError('登出失败')
     } finally {
       setLoading(false)
@@ -108,8 +150,8 @@ export default function ClientVerification({
       }
 
       setSignedUrlData(data)
-    } catch (err: any) {
-      setError(err.message || '获取失败')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '获取失败')
     } finally {
       setLoading(false)
     }

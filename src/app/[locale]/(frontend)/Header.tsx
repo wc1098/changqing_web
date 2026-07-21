@@ -11,7 +11,6 @@ const translations = {
     dramas: 'Drama Library',
     news: 'News',
     contact: 'Contact Us',
-    admin: 'CMS Admin',
   },
   zh: {
     about: '关于我们',
@@ -19,7 +18,6 @@ const translations = {
     dramas: '精品作品库',
     news: '新闻动态',
     contact: '联系我们',
-    admin: '管理后台',
   },
   ar: {
     about: 'من نحن',
@@ -27,7 +25,6 @@ const translations = {
     dramas: 'مكتبة الأعمال',
     news: 'الأخبار',
     contact: 'اتصل بنا',
-    admin: 'لوحة التحكم',
   },
   tr: {
     about: 'Hakkımızda',
@@ -35,7 +32,6 @@ const translations = {
     dramas: 'Dizi Kütüphanesi',
     news: 'Haberler',
     contact: 'İletişim',
-    admin: 'Yönetici Paneli',
   },
 }
 
@@ -81,9 +77,6 @@ export default function Header() {
         <Link href={`/${locale}/dramas`}>{t.dramas}</Link>
         <Link href={`/${locale}/news`}>{t.news}</Link>
         <Link href={`/${locale}/contact`}>{t.contact}</Link>
-        <a href="/admin" target="_blank" rel="noopener noreferrer" className="admin-link">
-          {t.admin}
-        </a>
       </nav>
 
       <div className="language-selector">

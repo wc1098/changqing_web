@@ -220,10 +220,10 @@ export default function DramaDetailClient({ locale, drama, episodes }: DramaDeta
   useEffect(() => {
     setTimeout(() => {
       checkLoginStatus()
+      if (episodes.length > 0) {
+        setActiveEpisodeId(episodes[0].id)
+      }
     }, 0)
-    if (episodes.length > 0) {
-      setActiveEpisodeId(episodes[0].id)
-    }
   }, [episodes])
 
   // 2. Trigger fetch playback URL when episode changes or user logs in

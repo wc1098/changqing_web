@@ -1,4 +1,4 @@
-import { headers as getHeaders } from 'next/headers'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getPayload } from 'payload'
 import Link from 'next/link'
 import config from '@/payload.config'
@@ -276,6 +276,7 @@ export default async function HomePage(props: {
               >
                 <div className="drama-card-image-wrapper">
                   {drama.poster && typeof drama.poster === 'object' ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
                     <img 
                       src={drama.poster.url || '/api/placeholder/400/600'} 
                       alt={drama.title} 
@@ -327,6 +328,7 @@ export default async function HomePage(props: {
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
                   {hasLogo ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
                     <img 
                       src={partner.logo.url} 
                       alt={partner.name} 
@@ -344,6 +346,7 @@ export default async function HomePage(props: {
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
                   {hasLogo ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
                     <img 
                       src={partner.logo.url} 
                       alt={partner.name} 

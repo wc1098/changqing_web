@@ -125,15 +125,15 @@ export default buildConfig({
           }
 
           // 5. 获取关联的视频资产
-          let videoAsset: any = episode.videoAsset
+          let videoAsset: Record<string, unknown> | string | null = episode.videoAsset as Record<string, unknown> | string | null
           if (typeof videoAsset === 'string') {
-            videoAsset = await payload.findByID({
+            videoAsset = (await payload.findByID({
               collection: 'video-assets',
               id: videoAsset,
-            })
+            })) as unknown as Record<string, unknown>
           }
 
-          if (!videoAsset) {
+          if (!videoAsset || typeof videoAsset !== 'object') {
             return Response.json({ error: 'Video asset not found' }, { status: 404 })
           }
 
@@ -150,17 +150,18 @@ export default buildConfig({
             provider: videoAsset.provider,
             transcodeStatus: videoAsset.transcodeStatus,
           })
-        } catch (err: any) {
+        } catch (err: unknown) {
+          const errObj = err as { name?: string; status?: number; message?: string }
           const isNotFound =
-            err.name === 'NotFound' ||
-            err.status === 404 ||
-            err.message?.includes('not found') ||
-            err.message?.includes('invalid input syntax') ||
-            err.message?.includes('cast')
+            errObj.name === 'NotFound' ||
+            errObj.status === 404 ||
+            errObj.message?.includes('not found') ||
+            errObj.message?.includes('invalid input syntax') ||
+            errObj.message?.includes('cast')
           if (isNotFound) {
             return Response.json({ error: 'Episode not found' }, { status: 404 })
           }
-          return Response.json({ error: err.message || 'Internal server error' }, { status: 500 })
+          return Response.json({ error: errObj.message || 'Internal server error' }, { status: 500 })
         }
       },
     },

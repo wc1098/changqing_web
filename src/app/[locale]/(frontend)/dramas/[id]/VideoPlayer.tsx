@@ -14,7 +14,7 @@ interface VideoPlayerProps {
 export default function VideoPlayer({ url, format, poster, clientEmail }: VideoPlayerProps) {
   const videoContainerRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
-  const playerRef = useRef<any>(null)
+  const playerRef = useRef<ReturnType<typeof videojs> | null>(null)
 
   const [watermarkPos, setWatermarkPos] = useState({ top: '20%', left: '20%' })
   const [currentTimeStr, setCurrentTimeStr] = useState('')

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getPayload, Payload } from 'payload'
 import config from '@/payload.config'
 import { describe, it, beforeAll, expect, afterAll } from 'vitest'
@@ -191,10 +192,10 @@ describe('Data Closed Loop and Access Control', () => {
     expect(episode1.id).toBeDefined()
 
     // 验证 drama 中的 episodeCount 自动更新为 1
-    let dramaUpdate1 = await payload.findByID({
+    const dramaUpdate1 = await payload.findByID({
       collection: 'dramas',
-      id: publishedDrama.id,
-      user: testAdmin,
+      id: publishedDrama.id as string,
+      user: testAdmin as any,
     })
     expect(dramaUpdate1.episodeCount).toBe(1)
 
@@ -208,7 +209,7 @@ describe('Data Closed Loop and Access Control', () => {
           title: '重复的第一集',
           enabled: true,
         },
-        user: testAdmin,
+        user: testAdmin as any,
       })
     ).rejects.toThrow()
 
@@ -221,15 +222,15 @@ describe('Data Closed Loop and Access Control', () => {
         title: '第二集：豪门风云',
         enabled: true,
       },
-      user: testAdmin,
+      user: testAdmin as any,
     })
     expect(episode2.id).toBeDefined()
 
     // 验证 count 增加至 2
-    let dramaUpdate2 = await payload.findByID({
+    const dramaUpdate2 = await payload.findByID({
       collection: 'dramas',
-      id: publishedDrama.id,
-      user: testAdmin,
+      id: publishedDrama.id as string,
+      user: testAdmin as any,
     })
     expect(dramaUpdate2.episodeCount).toBe(2)
 
@@ -237,13 +238,13 @@ describe('Data Closed Loop and Access Control', () => {
     await payload.delete({
       collection: 'episodes',
       id: episode2.id,
-      user: testAdmin,
+      user: testAdmin as any,
     })
 
-    let dramaUpdate3 = await payload.findByID({
+    const dramaUpdate3 = await payload.findByID({
       collection: 'dramas',
-      id: publishedDrama.id,
-      user: testAdmin,
+      id: publishedDrama.id as string,
+      user: testAdmin as any,
     })
     expect(dramaUpdate3.episodeCount).toBe(1)
   })
@@ -262,7 +263,7 @@ describe('Data Closed Loop and Access Control', () => {
       payload.find({
         collection: 'video-assets',
         overrideAccess: false,
-        user: testActiveClient,
+        user: testActiveClient as any,
       })
     ).rejects.toThrow()
 
@@ -281,6 +282,7 @@ describe('Data Closed Loop and Access Control', () => {
       (e) => e.path === '/video-assets/sign-play-url'
     )
     expect(endpoint).toBeDefined()
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     const handler = endpoint!.handler as Function
 
     // 1. 游客访问（user 未定义），应返回 401
