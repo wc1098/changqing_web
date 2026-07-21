@@ -1,6 +1,7 @@
-import { getPayload } from 'payload'
+import { getPayload, type Where } from 'payload'
 import Link from 'next/link'
 import config from '@/payload.config'
+import type { News } from '@/payload-types'
 
 const translations = {
   en: {
@@ -62,16 +63,16 @@ export default async function NewsPage(props: {
   const payloadConfig = await config
   const payload = await getPayload({ config: payloadConfig })
 
-  const queryConditions: any[] = []
+  const queryConditions: Where[] = []
   if (activeCategory) {
     queryConditions.push({ category: { equals: activeCategory } })
   }
 
-  let newsList: any[] = []
+  let newsList: News[] = []
   try {
     const newsRes = await payload.find({
       collection: 'news',
-      locale: locale as any,
+      locale: locale as 'en' | 'zh' | 'ar' | 'tr',
       where: queryConditions.length > 0 ? { and: queryConditions } : undefined,
       sort: '-publishDate',
       limit: 100,
@@ -120,7 +121,8 @@ export default async function NewsPage(props: {
           {newsList.map((item) => (
             <article key={item.id} className="news-card glass-panel">
               <div className="news-card-image-wrapper">
-                {item.coverImage && typeof item.coverImage === 'object' ? (
+                {item.coverImage && typeof item.coverImage === 'object' && item.coverImage.url ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={item.coverImage.url} alt={item.title} className="news-card-img" loading="lazy" />
                 ) : (
                   <div className="news-card-placeholder">

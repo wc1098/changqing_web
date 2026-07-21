@@ -1,6 +1,7 @@
-import { getPayload } from 'payload'
+import { getPayload, type Where } from 'payload'
 import Link from 'next/link'
 import config from '@/payload.config'
+import type { Genre, Language, Market, Platform, Drama } from '@/payload-types'
 
 const translations = {
   en: {
@@ -126,50 +127,45 @@ export default async function DramasPage(props: {
   const payload = await getPayload({ config: payloadConfig })
 
   // 1. Fetch filter options (Metadata lists)
-  let genres: any[] = []
-  let languages: any[] = []
-  let markets: any[] = []
-  let platforms: any[] = []
+  let genres: Genre[] = []
+  let languages: Language[] = []
+  let markets: Market[] = []
+  let platforms: Platform[] = []
+
+  const currentLocale = locale as 'en' | 'zh' | 'ar' | 'tr'
 
   try {
-    const genresRes = await payload.find({ collection: 'genres', locale: locale as any, limit: 100 })
-    genres = genresRes.docs
+    const genresRes = await payload.find({ collection: 'genres', locale: currentLocale, limit: 100 })
+    genres = genresRes.docs as Genre[]
 
-    const langsRes = await payload.find({ collection: 'languages', locale: locale as any, limit: 100 })
-    languages = langsRes.docs
+    const langsRes = await payload.find({ collection: 'languages', locale: currentLocale, limit: 100 })
+    languages = langsRes.docs as Language[]
 
-    const marketsRes = await payload.find({ collection: 'markets', locale: locale as any, limit: 100 })
-    markets = marketsRes.docs
+    const marketsRes = await payload.find({ collection: 'markets', locale: currentLocale, limit: 100 })
+    markets = marketsRes.docs as Market[]
 
-    const platformsRes = await payload.find({ collection: 'platforms', locale: locale as any, limit: 100 })
-    platforms = platformsRes.docs
+    const platformsRes = await payload.find({ collection: 'platforms', locale: currentLocale, limit: 100 })
+    platforms = platformsRes.docs as Platform[]
   } catch (error) {
     console.error('Error prefetching filters:', error)
   }
 
   // 2. Build where filter clauses
-  const queryConditions: any[] = [
+  const queryConditions: Where[] = [
     { _status: { equals: 'published' } }
   ]
 
   if (activeGenreCode) {
-    const genreObj = genres.find(g => g.code === activeGenreCode)
-    if (genreObj) queryConditions.push({ genres: { equals: genreObj.id } })
+    queryConditions.push({ 'genres.code': { equals: activeGenreCode } })
   }
-
   if (activeLangCode) {
-    const langObj = languages.find(l => l.code === activeLangCode)
-    if (langObj) queryConditions.push({ languages: { equals: langObj.id } })
+    queryConditions.push({ 'languages.code': { equals: activeLangCode } })
   }
-
   if (activeMarketCode) {
-    const marketObj = markets.find(m => m.code === activeMarketCode)
-    if (marketObj) queryConditions.push({ markets: { equals: marketObj.id } })
+    queryConditions.push({ 'markets.code': { equals: activeMarketCode } })
   }
-
   if (activePlatformCode) {
-    const platformObj = platforms.find(p => p.code === activePlatformCode)
-    if (platformObj) queryConditions.push({ platforms: { equals: platformObj.id } })
+    queryConditions.push({ 'platforms.code': { equals: activePlatformCode } })
   }
 
   if (activeEpRange) {
@@ -185,7 +181,7 @@ export default async function DramasPage(props: {
   }
 
   // 3. Fetch matching dramas with pagination
-  let dramas: any[] = []
+  let dramas: Drama[] = []
   let totalPages = 1
   let totalDocs = 0
   let hasPrevPage = false
@@ -194,11 +190,11 @@ export default async function DramasPage(props: {
   try {
     const dramasRes = await payload.find({
       collection: 'dramas',
-      locale: locale as any,
+      locale: currentLocale,
       where: {
         and: queryConditions
       },
-      sort: activeSort as any,
+      sort: activeSort as string,
       limit: 12,
       page: currentPage,
     })
@@ -374,8 +370,9 @@ export default async function DramasPage(props: {
               >
                 <div className="drama-card-image-wrapper">
                   {drama.poster && typeof drama.poster === 'object' ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
                     <img 
-                      src={drama.poster.url || '/api/placeholder/400/600'} 
+                      src={(drama.poster.url ?? undefined) || '/api/placeholder/400/600'} 
                       alt={drama.title} 
                       className="drama-card-img"
                       loading="lazy"
