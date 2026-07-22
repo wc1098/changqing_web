@@ -375,41 +375,43 @@ a {
 /* Rotating Orb Decoration */
 .orb-decoration {
   position: absolute;
-  right: -80px;
+  right: -60px;
   top: 50%;
   transform: translateY(-50%);
-  width: 440px;
-  height: 440px;
+  width: 420px;
+  height: 420px;
   border-radius: 50%;
-  border: 1px solid var(--line);
+  border: 1px solid rgba(212, 173, 98, 0.25);
   display: grid;
   place-items: center;
   box-shadow: 
-    0 0 100px rgba(212, 173, 98, 0.08), 
-    inset 0 0 80px rgba(212, 173, 98, 0.05);
+    0 0 100px rgba(212, 173, 98, 0.12), 
+    inset 0 0 80px rgba(212, 173, 98, 0.08);
   animation: orbFloat 6s ease-in-out infinite;
 }
 
 [dir="rtl"] .orb-decoration {
   right: auto;
-  left: -80px;
+  left: -60px;
 }
 
 .orb-decoration::before, .orb-decoration::after {
   content: "";
   position: absolute;
   border-radius: 50%;
-  border: 1px solid var(--line);
+  border: 1px dashed rgba(212, 173, 98, 0.3);
 }
 
-.orb-decoration::before { inset: 36px; animation: rotateCW 20s linear infinite; }
-.orb-decoration::after { inset: 72px; animation: rotateCCW 15s linear infinite; }
+.orb-decoration::before { inset: 24px; animation: rotateCW 20s linear infinite; }
+.orb-decoration::after { inset: 48px; border-style: solid; border-color: rgba(212, 173, 98, 0.15); animation: rotateCCW 15s linear infinite; }
 
-.orb-inner {
-  font-size: 110px;
-  font-family: 'Playfair Display', serif;
-  color: rgba(244, 217, 156, 0.85);
-  text-shadow: 0 0 30px rgba(212, 173, 98, 0.3);
+.hero-logo-img {
+  width: 260px;
+  height: 260px;
+  object-fit: contain;
+  border-radius: 50%;
+  filter: drop-shadow(0 0 30px rgba(212, 173, 98, 0.35));
+  z-index: 2;
 }
 
 .hero-glow {

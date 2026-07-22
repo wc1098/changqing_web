@@ -222,7 +222,13 @@ export default async function HomePage(props: {
           </div>
         </div>
         <div className="orb-decoration" aria-hidden="true">
-          <div className="orb-inner">東</div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img 
+            src="/icons/icon-512.png" 
+            alt="东方视野 Logo" 
+            className="hero-logo-img"
+            loading="eager"
+          />
         </div>
         <div className="hero-glow" aria-hidden="true" />
       </section>
