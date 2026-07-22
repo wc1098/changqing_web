@@ -12,58 +12,77 @@ interface VideoPlayerProps {
 }
 
 export default function VideoPlayer({ url, format, poster, clientEmail }: VideoPlayerProps) {
-  const videoContainerRef = useRef<HTMLDivElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
   const playerRef = useRef<ReturnType<typeof videojs> | null>(null)
 
   const [watermarkPos, setWatermarkPos] = useState({ top: '20%', left: '20%' })
   const [currentTimeStr, setCurrentTimeStr] = useState('')
 
-  // 1. Initialize and dispose Video.js Player
+  // 1. Initialize and update Video.js Player
   useEffect(() => {
-    if (!videoRef.current) return
+    const targetNode = containerRef.current
+    if (!targetNode || !url) return
 
-    const playerOptions = {
-      autoplay: true,
-      controls: true,
-      responsive: true,
-      fluid: true,
-      poster: poster || '',
-      sources: [
-        {
-          src: url,
-          type: format === 'hls' ? 'application/x-mpegURL' : 'video/mp4',
-        },
-      ],
-      controlBar: {
-        // Disable Picture-In-Picture & native download button
-        pictureInPictureToggle: false,
-        remainingTimeDisplay: {
-          displayNegative: false,
-        },
-      },
-      userActions: {
-        doubleClick: true,
-      },
+    const isHls = (format || '').toLowerCase() === 'hls' || url.includes('.m3u8')
+    const mimeType = isHls ? 'application/x-mpegURL' : 'video/mp4'
+
+    let videoElement = targetNode.querySelector('video')
+    if (!videoElement) {
+      videoElement = document.createElement('video')
+      videoElement.className = 'video-js vjs-big-play-centered vjs-theme-city'
+      videoElement.setAttribute('playsinline', 'true')
+      videoElement.setAttribute('webkit-playsinline', 'true')
+      targetNode.appendChild(videoElement)
     }
 
-    const player = playerRef.current = videojs(videoRef.current, playerOptions, () => {
-      // Player is ready
-    })
+    if (!playerRef.current) {
+      const player = playerRef.current = videojs(videoElement, {
+        autoplay: true,
+        controls: true,
+        responsive: true,
+        fluid: true,
+        poster: poster || '',
+        sources: [
+          {
+            src: url,
+            type: mimeType,
+          },
+        ],
+        controlBar: {
+          pictureInPictureToggle: false,
+          remainingTimeDisplay: {
+            displayNegative: false,
+          },
+        },
+        userActions: {
+          doubleClick: true,
+        },
+      }, () => {
+        player.play()?.catch(() => {})
+      })
 
-    // Custom overlay to prevent downloading
-    player.ready(() => {
-      const tech = player.tech({ IWillNotUseThisInApp: true })
-      if (tech && tech.el()) {
-        tech.el().setAttribute('controlsList', 'nodownload')
-        tech.el().setAttribute('disablePictureInPicture', 'true')
-      }
-    })
+      player.ready(() => {
+        const tech = player.tech({ IWillNotUseThisInApp: true })
+        if (tech && tech.el()) {
+          tech.el().setAttribute('controlsList', 'nodownload')
+          tech.el().setAttribute('disablePictureInPicture', 'true')
+        }
+      })
+    } else {
+      const player = playerRef.current
+      player.autoplay(true)
+      player.src({ src: url, type: mimeType })
+      if (poster) player.poster(poster)
+      player.play()?.catch(() => {})
+    }
 
     return () => {
-      if (player && !player.isDisposed()) {
-        player.dispose()
+      if (playerRef.current && !playerRef.current.isDisposed()) {
+        playerRef.current.dispose()
         playerRef.current = null
+        if (targetNode) {
+          targetNode.innerHTML = ''
+        }
       }
     }
   }, [url, format, poster])
@@ -95,15 +114,9 @@ export default function VideoPlayer({ url, format, poster, clientEmail }: VideoP
   return (
     <div 
       className="video-player-outer-wrapper"
-      ref={videoContainerRef}
       onContextMenu={(e) => e.preventDefault()} // Disable right click
     >
-      <div data-vjs-player>
-        <video 
-          ref={videoRef} 
-          className="video-js vjs-big-play-centered vjs-theme-city"
-        />
-      </div>
+      <div ref={containerRef} className="vjs-container-target" style={{ width: '100%', height: '100%' }} />
 
       {/* Floating Anti-Theft Watermark Overlay */}
       {clientEmail && (

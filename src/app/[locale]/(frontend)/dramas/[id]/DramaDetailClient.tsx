@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
+import { AlertTriangle, Zap, LogOut, Lock, FileText, ShieldCheck, Share2 } from 'lucide-react'
 import VideoPlayer from './VideoPlayer'
 
 const translations = {
@@ -238,7 +239,7 @@ export default function DramaDetailClient({ locale, drama, episodes }: DramaDeta
       if (res.ok) {
         setSignedUrlData(data)
       } else {
-        throw new Error(data.error || t.unauthorized)
+        throw new Error(data.error || (res.status === 401 ? t.unauthorized : '请求视频播放资源失败'))
       }
     } catch (err: unknown) {
       const error = err as Error
@@ -248,13 +249,20 @@ export default function DramaDetailClient({ locale, drama, episodes }: DramaDeta
     }
   }, [t.unauthorized])
 
+  const allowTrailer = Boolean(drama.rights?.allowTrailer)
+  const allowFullEpisodes = Boolean(drama.rights?.allowFullEpisodes)
+
   useEffect(() => {
-    if (currentUser && activeEpisodeId) {
-      setTimeout(() => {
-        fetchPlayUrl(activeEpisodeId)
-      }, 0)
+    if (activeEpisodeId) {
+      const currentEp = episodes.find(ep => ep.id === activeEpisodeId)
+      const isFreePreview = allowFullEpisodes || (currentEp?.episodeNumber === 1 && allowTrailer)
+      if (currentUser || isFreePreview) {
+        setTimeout(() => {
+          fetchPlayUrl(activeEpisodeId)
+        }, 0)
+      }
     }
-  }, [currentUser, activeEpisodeId, fetchPlayUrl])
+  }, [currentUser, activeEpisodeId, allowTrailer, allowFullEpisodes, episodes, fetchPlayUrl])
 
   // 3. Handle Client Login
   const handleLogin = async (e: React.FormEvent) => {
@@ -301,13 +309,14 @@ export default function DramaDetailClient({ locale, drama, episodes }: DramaDeta
   }
 
   const activeEpisode = episodes.find(ep => ep.id === activeEpisodeId)
+  const canPlayActiveEpisode = currentUser || allowFullEpisodes || (allowTrailer && activeEpisode?.episodeNumber === 1)
 
   return (
     <div className="drama-detail-layout">
       {/* Upper Area: Video Player & Episode List */}
       <div className="drama-player-container glass-panel">
         <div className="player-left-main">
-          {currentUser ? (
+          {canPlayActiveEpisode ? (
             <div className="video-player-wrapper">
               {fetchUrlLoading ? (
                 <div className="player-message-overlay">
@@ -316,7 +325,7 @@ export default function DramaDetailClient({ locale, drama, episodes }: DramaDeta
                 </div>
               ) : errorMsg ? (
                 <div className="player-message-overlay error">
-                  <span>⚠️</span>
+                  <AlertTriangle size={24} color="var(--gold)" />
                   <p>{errorMsg}</p>
                 </div>
               ) : signedUrlData ? (
@@ -325,10 +334,10 @@ export default function DramaDetailClient({ locale, drama, episodes }: DramaDeta
                     url={signedUrlData.url}
                     format={signedUrlData.format}
                     poster={drama.poster?.url || ''}
-                    clientEmail={currentUser.email}
+                    clientEmail={currentUser?.email || 'Guest Preview'}
                   />
                   <div className="signed-url-meta">
-                    <p className="url-banner">⚡ {t.playStatusReady}</p>
+                    <p className="url-banner" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Zap size={14} color="var(--gold-light)" /> {t.playStatusReady}</p>
                     <div className="meta-grid">
                       <div>{t.duration}: <strong>{signedUrlData.duration || activeEpisode?.duration || '120'} {t.sec}</strong></div>
                       <div>{t.provider}: <strong>{signedUrlData.provider || 'Aliyun OSS'}</strong></div>
@@ -372,26 +381,29 @@ export default function DramaDetailClient({ locale, drama, episodes }: DramaDeta
         <div className="player-right-sidebar">
           <h3>{t.epListTitle}</h3>
           <div className="episodes-list-scroll">
-            {episodes.map((ep) => (
-              <button
-                key={ep.id}
-                onClick={() => {
-                  if (!currentUser) {
-                    setLoginModalOpen(true)
-                  } else {
-                    setActiveEpisodeId(ep.id)
-                  }
-                }}
-                className={`ep-select-btn ${activeEpisodeId === ep.id ? 'active' : ''}`}
-              >
-                <span className="num">{ep.episodeNumber}</span>
-                <span className="title">{ep.title}</span>
-              </button>
-            ))}
+            {episodes.map((ep) => {
+              const isFreePreview = allowFullEpisodes || (ep.episodeNumber === 1 && allowTrailer)
+              return (
+                <button
+                  key={ep.id}
+                  onClick={() => {
+                    if (!currentUser && !isFreePreview) {
+                      setLoginModalOpen(true)
+                    } else {
+                      setActiveEpisodeId(ep.id)
+                    }
+                  }}
+                  className={`ep-select-btn ${activeEpisodeId === ep.id ? 'active' : ''}`}
+                >
+                  <span className="num">{ep.episodeNumber}</span>
+                  <span className="title">{ep.title} {isFreePreview && !currentUser ? '(Preview)' : ''}</span>
+                </button>
+              )
+            })}
           </div>
           {currentUser && (
-            <button className="logout-btn-sidebar" onClick={handleLogout}>
-              🚪 {t.logoutBtn} ({currentUser.email})
+            <button className="logout-btn-sidebar" onClick={handleLogout} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <LogOut size={14} /> {t.logoutBtn} ({currentUser.email})
             </button>
           )}
         </div>
@@ -403,7 +415,7 @@ export default function DramaDetailClient({ locale, drama, episodes }: DramaDeta
           <div className="modal-window glass-panel" onClick={(e) => e.stopPropagation()}>
             <button className="modal-close-btn" onClick={() => setLoginModalOpen(false)}>✕</button>
             <div className="lock-box">
-              <span className="lock-icon">🔒</span>
+              <span className="lock-icon" style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}><Lock size={28} color="var(--gold-light)" /></span>
               <h3>{t.loginTitle}</h3>
               <p>{t.loginDesc}</p>
               
@@ -426,7 +438,7 @@ export default function DramaDetailClient({ locale, drama, episodes }: DramaDeta
                   {loading ? t.loading : t.loginBtn}
                 </button>
               </form>
-              {errorMsg && <p className="lock-error-msg">⚠️ {errorMsg}</p>}
+              {errorMsg && <p className="lock-error-msg" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><AlertTriangle size={14} color="#f87171" /> {errorMsg}</p>}
             </div>
           </div>
         </div>
@@ -439,7 +451,7 @@ export default function DramaDetailClient({ locale, drama, episodes }: DramaDeta
           <p className="summary-p">{drama.summary}</p>
 
           <div className="specs-section">
-            <h3>📋 {t.detailsTitle}</h3>
+            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><FileText size={18} color="var(--gold-light)" /> {t.detailsTitle}</h3>
             <table className="specs-table">
               <tbody>
                 <tr>
@@ -478,7 +490,7 @@ export default function DramaDetailClient({ locale, drama, episodes }: DramaDeta
         </div>
 
         <div className="info-rights glass-panel">
-          <h3>🔐 {t.rightsTitle}</h3>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><ShieldCheck size={18} color="var(--gold-light)" /> {t.rightsTitle}</h3>
           <div className="rights-details">
             <div className="rights-row">
               <span>{t.rightsOwner}:</span>
@@ -513,24 +525,8 @@ export default function DramaDetailClient({ locale, drama, episodes }: DramaDeta
                 target="_blank"
                 rel="noopener noreferrer"
                 className="whatsapp-share-btn"
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '8px',
-                  background: 'linear-gradient(135deg, #128C7E, #075E54)',
-                  color: '#fff',
-                  border: 'none',
-                  padding: '10px 16px',
-                  borderRadius: '4px',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                  cursor: 'pointer',
-                  transition: 'opacity 0.2s ease',
-                }}
               >
-                <span style={{ fontSize: '16px' }}>💬</span>
+                <Share2 size={15} />
                 {t.shareText}
               </a>
             </div>

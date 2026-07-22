@@ -7,8 +7,8 @@ import { useParams } from 'next/navigation'
 const translations = {
   en: {
     address: 'Dubai Silicon Oasis, DDP, Building A2, Dubai, UAE',
-    email: 'Email: contact@easternvision.ae',
-    phone: 'Phone: +971 4 123 4567',
+    email: 'Email: business@stellarblue.cn',
+    phone: 'Phone: +971 50 881 7151 / +86 137 8358 1093',
     rights: 'All rights reserved.',
     privacy: 'Privacy Policy',
     terms: 'Terms of Service',
@@ -21,8 +21,8 @@ const translations = {
   },
   zh: {
     address: '阿联酋迪拜硅谷绿洲 DDP A2栋',
-    email: '邮箱：contact@easternvision.ae',
-    phone: '电话：+971 4 123 4567',
+    email: '邮箱：business@stellarblue.cn',
+    phone: '电话：+971 50 881 7151 / +86 137 8358 1093',
     rights: '版权所有。',
     privacy: '隐私政策',
     terms: '服务条款',
@@ -35,8 +35,8 @@ const translations = {
   },
   ar: {
     address: 'واحة دبي للسيليكون، مبنى A2، دبي، الإمارات العربية المتحدة',
-    email: 'البريد الإلكتروني: contact@easternvision.ae',
-    phone: 'الهاتف: +971 4 123 4567',
+    email: 'البريد الإلكتروني: business@stellarblue.cn',
+    phone: 'الهاتف: +971 50 881 7151 / +86 137 8358 1093',
     rights: 'جميع الحقوق محفوظة.',
     privacy: 'سياسة الخصوصية',
     terms: 'شروط الخدمة',
@@ -49,8 +49,8 @@ const translations = {
   },
   tr: {
     address: 'Dubai Silicon Oasis, DDP, A2 Binası, Dubai, BAE',
-    email: 'E-posta: contact@easternvision.ae',
-    phone: 'Telefon: +971 4 123 4567',
+    email: 'E-posta: business@stellarblue.cn',
+    phone: 'Telefon: +971 50 881 7151 / +86 137 8358 1093',
     rights: 'Tüm hakları saklıdır.',
     privacy: 'Gizlilik Politikası',
     terms: 'Kullanım Koşulları',

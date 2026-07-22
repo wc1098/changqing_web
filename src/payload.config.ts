@@ -129,21 +129,7 @@ export default buildConfig({
       method: 'get',
       handler: async (req) => {
         const { user, payload } = req
-        
-        // 1. 鉴权校验：必须为登录的且启用状态为 true 的 admin 或 client
-        if (!user) {
-          return Response.json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        const isUserActive = user.active === true
-        const isClient = user.collection === 'clients'
-        const isAdmin = user.collection === 'admins'
-
-        if (!isUserActive || (!isClient && !isAdmin)) {
-          return Response.json({ error: 'Access denied: account is disabled or unauthorized' }, { status: 403 })
-        }
-
-        // 2. 参数校验
+        // 1. 参数校验
         if (!req.url) {
           return Response.json({ error: 'Missing request URL' }, { status: 400 })
         }
@@ -154,32 +140,75 @@ export default buildConfig({
         }
 
         try {
-          // 3. 查找分集
+          // 2. 查找分集
           const episode = await payload.findByID({
             collection: 'episodes',
             id: episodeId,
+            overrideAccess: true,
           })
 
           if (!episode) {
             return Response.json({ error: 'Episode not found' }, { status: 404 })
           }
 
-          // 4. 判断该剧集是否启用 (游客或客户只能播放启用的剧集)
+          // 3. 获取短剧版权声明 (检查是否允许预告片试看)
+          const dramaId = typeof episode.drama === 'object' && episode.drama !== null && 'id' in episode.drama
+            ? String((episode.drama as { id: unknown }).id)
+            : String(episode.drama)
+
+          const drama = (await payload.findByID({
+            collection: 'dramas',
+            id: dramaId,
+            overrideAccess: true,
+          })) as unknown as Record<string, unknown>
+
+          const rights = drama && typeof drama === 'object' ? (drama.rights as Record<string, unknown> | undefined) : undefined
+          const allowTrailer = Boolean(rights?.allowTrailer)
+          const allowFullEpisodes = Boolean(rights?.allowFullEpisodes)
+          const isFreePreview = allowFullEpisodes || (episode.episodeNumber === 1 && allowTrailer)
+
+          // 4. 鉴权校验：当符合免登录播放（全集免费或第1集试看）时免登录放行
+          if (!isFreePreview) {
+            if (!user) {
+              return Response.json({ error: 'Unauthorized' }, { status: 401 })
+            }
+            const isUserActive = user.active === true
+            const isClient = user.collection === 'clients'
+            const isAdmin = user.collection === 'admins'
+
+            if (!isUserActive || (!isClient && !isAdmin)) {
+              return Response.json({ error: 'Access denied: account is disabled or unauthorized' }, { status: 403 })
+            }
+          }
+
+          // 5. 判断分集启用状态
+          const isAdmin = user && user.collection === 'admins'
           if (!episode.enabled && !isAdmin) {
             return Response.json({ error: 'Episode is disabled' }, { status: 403 })
           }
 
-          // 5. 获取关联的视频资产
-          let videoAsset: Record<string, unknown> | string | null = episode.videoAsset as Record<string, unknown> | string | null
-          if (typeof videoAsset === 'string') {
-            videoAsset = (await payload.findByID({
-              collection: 'video-assets',
-              id: videoAsset,
-            })) as unknown as Record<string, unknown>
+          // 6. 获取关联的视频资产
+          let rawAssetId: unknown = episode.videoAsset
+          if (typeof rawAssetId === 'object' && rawAssetId !== null && 'id' in rawAssetId) {
+            rawAssetId = (rawAssetId as { id: unknown }).id
           }
 
-          if (!videoAsset || typeof videoAsset !== 'object') {
-            return Response.json({ error: 'Video asset not found' }, { status: 404 })
+          const validAssetId = rawAssetId && rawAssetId !== 'null' && rawAssetId !== 'undefined' && !Number.isNaN(Number(rawAssetId))
+            ? String(rawAssetId)
+            : null
+
+          if (!validAssetId) {
+            return Response.json({ error: '该分集尚未在后台关联视频资产文件 (Video asset not linked)' }, { status: 404 })
+          }
+
+          const videoAsset = (await payload.findByID({
+            collection: 'video-assets',
+            id: validAssetId,
+            overrideAccess: true,
+          })) as unknown as Record<string, unknown>
+
+          if (!videoAsset || typeof videoAsset !== 'object' || !videoAsset.objectKey) {
+            return Response.json({ error: '视频资产对象不存在或缺少 OSS Key' }, { status: 404 })
           }
 
           // 6. 动态从 .env 读取域名并生成防盗链签名播放 URL
@@ -191,7 +220,8 @@ export default buildConfig({
             : cleanEndpoint
 
           const expires = Math.floor(Date.now() / 1000) + 3600 // 1小时有效
-          const mockSignature = Buffer.from(`${videoAsset.objectKey}-${expires}-${user.id}`).toString('base64').substring(0, 16)
+          const userId = user?.id || 'guest'
+          const mockSignature = Buffer.from(`${videoAsset.objectKey}-${expires}-${userId}`).toString('base64').substring(0, 16)
           const signedUrl = `https://${baseHost}/${videoAsset.objectKey}?provider=${videoAsset.provider}&expires=${expires}&signature=${mockSignature}`
 
           return Response.json({

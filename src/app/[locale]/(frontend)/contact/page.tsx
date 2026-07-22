@@ -251,7 +251,7 @@ export default function ContactPage() {
               <span className="card-icon"><Mail size={20} /></span>
               <div>
                 <h4>{t.hqMail}</h4>
-                <p>contact@easternvision.ae</p>
+                <p>business@stellarblue.cn</p>
               </div>
             </div>
 
@@ -259,7 +259,7 @@ export default function ContactPage() {
               <span className="card-icon"><Phone size={20} /></span>
               <div>
                 <h4>{t.hqPhone}</h4>
-                <p>+971 4 123 4567</p>
+                <p>+971 50 881 7151 / +86 137 8358 1093</p>
               </div>
             </div>
           </div>

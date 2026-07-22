@@ -1,6 +1,6 @@
 import { getPayload, type Where } from 'payload'
 import Link from 'next/link'
-import { Film, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Film, ChevronLeft, ChevronRight, SlidersHorizontal, Globe, Tv, Layers, ArrowUpDown, RotateCcw, Sparkles } from 'lucide-react'
 import config from '@/payload.config'
 import type { Genre, Language, Market, Platform, Drama } from '@/payload-types'
 
@@ -258,7 +258,7 @@ export default async function DramasPage(props: {
       <div className="filter-system glass-panel">
         {/* Genre */}
         <div className="filter-row">
-          <span className="filter-label">{t.filterGenre}:</span>
+          <span className="filter-label"><SlidersHorizontal size={14} /> {t.filterGenre}:</span>
           <div className="filter-options">
             <Link href={getFilterUrl('genre', '')} className={`filter-opt-btn ${!activeGenreCode ? 'active' : ''}`}>
               {t.all}
@@ -273,7 +273,7 @@ export default async function DramasPage(props: {
 
         {/* Language */}
         <div className="filter-row">
-          <span className="filter-label">{t.filterLang}:</span>
+          <span className="filter-label"><Globe size={14} /> {t.filterLang}:</span>
           <div className="filter-options">
             <Link href={getFilterUrl('lang', '')} className={`filter-opt-btn ${!activeLangCode ? 'active' : ''}`}>
               {t.all}
@@ -288,7 +288,7 @@ export default async function DramasPage(props: {
 
         {/* Market */}
         <div className="filter-row">
-          <span className="filter-label">{t.filterMarket}:</span>
+          <span className="filter-label"><Sparkles size={14} /> {t.filterMarket}:</span>
           <div className="filter-options">
             <Link href={getFilterUrl('market', '')} className={`filter-opt-btn ${!activeMarketCode ? 'active' : ''}`}>
               {t.all}
@@ -303,7 +303,7 @@ export default async function DramasPage(props: {
 
         {/* Platform */}
         <div className="filter-row">
-          <span className="filter-label">{t.filterPlatform}:</span>
+          <span className="filter-label"><Tv size={14} /> {t.filterPlatform}:</span>
           <div className="filter-options">
             <Link href={getFilterUrl('platform', '')} className={`filter-opt-btn ${!activePlatformCode ? 'active' : ''}`}>
               {t.all}
@@ -318,7 +318,7 @@ export default async function DramasPage(props: {
 
         {/* Episodes Count Range */}
         <div className="filter-row">
-          <span className="filter-label">{t.filterEpisodes}:</span>
+          <span className="filter-label"><Layers size={14} /> {t.filterEpisodes}:</span>
           <div className="filter-options">
             <Link href={getFilterUrl('episodes', '')} className={`filter-opt-btn ${!activeEpRange ? 'active' : ''}`}>
               {t.all}
@@ -329,7 +329,7 @@ export default async function DramasPage(props: {
             <Link href={getFilterUrl('episodes', '11-30')} className={`filter-opt-btn ${activeEpRange === '11-30' ? 'active' : ''}`}>
               {t.epRange2}
             </Link>
-            <Link href={getFilterUrl('episodes', '30+')} className={`filter-opt-btn ${activeEpRange === '30+'} ? 'active' : ''`}>
+            <Link href={getFilterUrl('episodes', '30+')} className={`filter-opt-btn ${activeEpRange === '30+' ? 'active' : ''}`}>
               {t.epRange3}
             </Link>
           </div>
@@ -337,7 +337,7 @@ export default async function DramasPage(props: {
 
         {/* Sort Order */}
         <div className="filter-row">
-          <span className="filter-label">{t.filterSort}:</span>
+          <span className="filter-label"><ArrowUpDown size={14} /> {t.filterSort}:</span>
           <div className="filter-options">
             <Link href={getFilterUrl('sort', '-releaseDate')} className={`filter-opt-btn ${activeSort === '-releaseDate' ? 'active' : ''}`}>
               {t.sortLatest}
@@ -352,8 +352,8 @@ export default async function DramasPage(props: {
         {(activeGenreCode || activeLangCode || activeMarketCode || activePlatformCode || activeEpRange) && (
           <div className="filter-summary-row">
             <span>{totalDocs} {t.totalFound}</span>
-            <Link href={`/${locale}/dramas`} className="clear-filters-btn">
-              {t.clearFilters} ✕
+            <Link href={`/${locale}/dramas`} className="clear-filters-btn" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              <RotateCcw size={13} /> {t.clearFilters}
             </Link>
           </div>
         )}

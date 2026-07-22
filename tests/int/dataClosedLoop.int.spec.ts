@@ -15,6 +15,7 @@ let publishedDrama: any
 let draftDrama: any
 let videoAsset: any
 let episode1: any
+let episode2: any
 
 describe('Data Closed Loop and Access Control', () => {
   beforeAll(async () => {
@@ -215,12 +216,13 @@ describe('Data Closed Loop and Access Control', () => {
     ).rejects.toThrow()
 
     // 3. 创建第二个有效分集
-    const episode2 = await payload.create({
+    episode2 = await payload.create({
       collection: 'episodes',
       data: {
         drama: publishedDrama.id,
         episodeNumber: 2,
         title: '第二集：豪门风云',
+        videoAsset: videoAsset.id,
         enabled: true,
       },
       user: testAdmin as any,
@@ -286,7 +288,18 @@ describe('Data Closed Loop and Access Control', () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     const handler = endpoint!.handler as Function
 
-    // 1. 游客访问（user 未定义），应返回 401
+    // 1. 禁用预告片免登录播放时，游客访问（user 未定义），应返回 401
+    await payload.update({
+      collection: 'dramas',
+      id: publishedDrama.id,
+      data: {
+        rights: {
+          allowTrailer: false,
+        },
+      },
+      overrideAccess: true,
+    })
+
     const resGuest = await handler({
       user: null,
       payload,
