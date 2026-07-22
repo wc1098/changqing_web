@@ -1,4 +1,5 @@
 import React from 'react'
+import { Target, Eye } from 'lucide-react'
 
 const translations = {
   en: {
@@ -90,19 +91,24 @@ export default async function AboutPage(props: {
           <div className="visual-graphic">
             <div className="pulse-circle" />
             <div className="connecting-line" />
-            <span className="visual-logo">EV</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src="/icons/icon-512.png" 
+              alt="Eastern Vision Logo" 
+              className="about-visual-logo-img" 
+            />
           </div>
         </div>
       </div>
 
       <div className="mission-vision-row">
         <div className="mv-card glass-panel">
-          <div className="mv-icon">🎯</div>
+          <div className="mv-icon"><Target size={26} /></div>
           <h3>{t.missionTitle}</h3>
           <p>{t.missionText}</p>
         </div>
         <div className="mv-card glass-panel">
-          <div className="mv-icon">👁️</div>
+          <div className="mv-icon"><Eye size={26} /></div>
           <h3>{t.visionTitle}</h3>
           <p>{t.visionText}</p>
         </div>

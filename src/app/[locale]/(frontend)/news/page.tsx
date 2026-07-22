@@ -1,5 +1,6 @@
 import { getPayload, type Where } from 'payload'
 import Link from 'next/link'
+import { Newspaper } from 'lucide-react'
 import config from '@/payload.config'
 import type { News } from '@/payload-types'
 
@@ -126,7 +127,7 @@ export default async function NewsPage(props: {
                   <img src={item.coverImage.url} alt={item.title} className="news-card-img" loading="lazy" />
                 ) : (
                   <div className="news-card-placeholder">
-                    <span>📰</span>
+                    <Newspaper size={36} color="var(--gold-light)" />
                   </div>
                 )}
                 <span className="news-card-tag">{getCategoryLabel(item.category)}</span>

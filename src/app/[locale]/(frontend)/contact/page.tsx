@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { MapPin, Building2, Mail, Phone } from 'lucide-react'
 import { useParams } from 'next/navigation'
 
 const translations = {
@@ -212,26 +213,34 @@ export default function ContactPage() {
 
         {/* Right Side: Map & Address Cards */}
         <div className="contact-sidebar-box">
-          {/* Stylized Digital Map of Headquarters */}
+          {/* Real Interactive Dark Map of Headquarters */}
           <div className="digital-map-widget glass-panel">
-            <div className="map-radar" />
-            <div className="map-crosshair" />
-            <div className="map-marker-glow">
-              <span className="marker-dot" />
-            </div>
-            
-            <div className="map-info-readout">
-              <h4>{t.mapTitle}</h4>
-              <p className="coords">{t.mapLat}</p>
-              <p className="coords">{t.mapLng}</p>
-              <p className="location-name">📍 {t.mapLoc}</p>
+            <iframe
+              title="Dubai Headquarters Location Map"
+              className="dark-map-iframe"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=55.3650%2C25.1100%2C55.4000%2C25.1360&amp;layer=mapnik&amp;marker=25.1232%2C55.3821"
+              loading="lazy"
+            />
+            <div className="map-badge-overlay">
+              <div className="map-badge-header">
+                <span className="location-pin"><MapPin size={18} /></span>
+                <div>
+                  <h4>{t.mapTitle}</h4>
+                  <p className="location-name">{t.mapLoc}</p>
+                </div>
+              </div>
+              <div className="map-badge-coords">
+                <span>{t.mapLat}</span>
+                <span>•</span>
+                <span>{t.mapLng}</span>
+              </div>
             </div>
           </div>
 
           {/* Quick Details Cards */}
           <div className="office-info-cards">
             <div className="office-card glass-panel">
-              <span className="card-icon">🏢</span>
+              <span className="card-icon"><Building2 size={20} /></span>
               <div>
                 <h4>{t.hqTitle}</h4>
                 <p>Dubai Silicon Oasis, DDP, Building A2, Dubai, United Arab Emirates</p>
@@ -239,7 +248,7 @@ export default function ContactPage() {
             </div>
 
             <div className="office-card glass-panel">
-              <span className="card-icon">✉️</span>
+              <span className="card-icon"><Mail size={20} /></span>
               <div>
                 <h4>{t.hqMail}</h4>
                 <p>contact@easternvision.ae</p>
@@ -247,7 +256,7 @@ export default function ContactPage() {
             </div>
 
             <div className="office-card glass-panel">
-              <span className="card-icon">📞</span>
+              <span className="card-icon"><Phone size={20} /></span>
               <div>
                 <h4>{t.hqPhone}</h4>
                 <p>+971 4 123 4567</p>

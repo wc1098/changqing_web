@@ -4,3 +4,5 @@ node_modules
 *.log
 Dockerfile
 docker-compose*.yml
+data-base
+media

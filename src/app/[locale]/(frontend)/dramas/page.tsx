@@ -1,5 +1,6 @@
 import { getPayload, type Where } from 'payload'
 import Link from 'next/link'
+import { Film, ChevronLeft, ChevronRight } from 'lucide-react'
 import config from '@/payload.config'
 import type { Genre, Language, Market, Platform, Drama } from '@/payload-types'
 
@@ -379,7 +380,7 @@ export default async function DramasPage(props: {
                     />
                   ) : (
                     <div className="drama-card-placeholder">
-                      <span>{drama.title.substring(0, 2)}</span>
+                      <Film size={36} color="var(--gold-light)" />
                     </div>
                   )}
                   <div className="drama-card-tag">{t.status}</div>
@@ -404,7 +405,7 @@ export default async function DramasPage(props: {
                 className={`pagination-btn ${!hasPrevPage ? 'disabled' : ''}`}
                 tabIndex={hasPrevPage ? 0 : -1}
               >
-                ← {t.prevPage}
+                <ChevronLeft size={16} /> {t.prevPage}
               </Link>
               <div className="pagination-pages">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
@@ -422,7 +423,7 @@ export default async function DramasPage(props: {
                 className={`pagination-btn ${!hasNextPage ? 'disabled' : ''}`}
                 tabIndex={hasNextPage ? 0 : -1}
               >
-                {t.nextPage} →
+                {t.nextPage} <ChevronRight size={16} />
               </Link>
             </div>
           )}

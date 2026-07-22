@@ -64,7 +64,7 @@ async function seed() {
       collection: 'genres',
       where: { code: { equals: g.code } },
     })
-    let docId: string
+    let docId: number | string
     if (found.docs.length === 0) {
       const created = await payload.create({
         collection: 'genres',
@@ -112,7 +112,7 @@ async function seed() {
       collection: 'languages',
       where: { code: { equals: l.code } },
     })
-    let docId: string
+    let docId: number | string
     if (found.docs.length === 0) {
       const created = await payload.create({
         collection: 'languages',
@@ -157,7 +157,7 @@ async function seed() {
       collection: 'markets',
       where: { code: { equals: m.code } },
     })
-    let docId: string
+    let docId: number | string
     if (found.docs.length === 0) {
       const created = await payload.create({
         collection: 'markets',
@@ -205,7 +205,7 @@ async function seed() {
       collection: 'platforms',
       where: { code: { equals: p.code } },
     })
-    let docId: string
+    let docId: number | string
     if (found.docs.length === 0) {
       const created = await payload.create({
         collection: 'platforms',

@@ -130,7 +130,14 @@ const servicesData = {
 }
 
 const partnerLogos = [
-  'TikTok MENA', 'Shahid VIP', 'Starzplay', 'Viu', 'WeTV Arabia', 'YouTube MENA', 'Facebook Watch', 'Snapchat Discover'
+  { name: 'TikTok MENA', logo: '/icons/tiktok.jpg', link: 'https://www.tiktok.com' },
+  { name: 'Shahid VIP', logo: '/icons/shahid.jpg', link: 'https://shahid.mbc.net' },
+  { name: 'Starzplay Arabia', logo: '/icons/Starzplay.jpg', link: 'https://starzplay.com' },
+  { name: 'Viu OTT', logo: '/icons/viu.jpg', link: 'https://www.viu.com' },
+  { name: 'WeTV Arabia', logo: '/icons/wetv.jpg', link: 'https://wetv.vip' },
+  { name: 'YouTube MENA', logo: '/icons/youtube.jpg', link: 'https://www.youtube.com' },
+  { name: 'Snapchat Discover', logo: '/icons/Snapchat.jpg', link: 'https://www.snapchat.com' },
+  { name: 'Facebook Watch', logo: '/icons/Facebook.jpg', link: 'https://www.facebook.com' },
 ]
 
 export default async function HomePage(props: {
@@ -361,9 +368,22 @@ export default async function HomePage(props: {
             })
           ) : (
             partnerLogos.map((partner, index) => (
-              <div key={index} className="partner-logo-tile glass-panel">
-                <span>{partner}</span>
-              </div>
+              <a
+                key={index}
+                href={partner.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="partner-logo-tile glass-panel"
+                title={partner.name}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={partner.logo}
+                  alt={partner.name}
+                  className="partner-logo-img"
+                  loading="lazy"
+                />
+              </a>
             ))
           )}
         </div>

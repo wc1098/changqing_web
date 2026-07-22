@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
+import { Globe } from 'lucide-react'
 import { usePathname, useParams } from 'next/navigation'
 
 const translations = {
@@ -64,13 +64,11 @@ export default function Header() {
   return (
     <header className="nav">
       <Link className="brand" href={`/${locale}`}>
-        <Image 
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img 
           src="/icons/icon-192.png" 
           alt="Eastern Vision Logo" 
-          width={42}
-          height={42}
           className="brand-logo-img" 
-          priority
         />
         <span>
           <strong>
@@ -98,7 +96,7 @@ export default function Header() {
           onClick={() => setDropdownOpen(!dropdownOpen)}
           aria-expanded={dropdownOpen}
         >
-          🌐 {languages.find(l => l.code === locale)?.label || 'English'}
+          <Globe size={16} /> {languages.find(l => l.code === locale)?.label || 'English'}
         </button>
         {dropdownOpen && (
           <div className="language-dropdown">
