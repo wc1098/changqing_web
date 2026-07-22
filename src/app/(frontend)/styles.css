@@ -2418,29 +2418,43 @@ a {
   }
 
   .drama-theater-container {
-    grid-template-columns: 1fr;
-    gap: 28px;
-    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    gap: 20px;
+    padding: 16px;
   }
 
-  .theater-left-info {
-    border-right: none;
-    border-bottom: 1px solid var(--line);
-    padding-right: 0;
-    padding-bottom: 20px;
-  }
-
-  .theater-right-episodes {
-    border-left: none;
-    border-top: 1px solid var(--line);
-    padding-left: 0;
-    padding-top: 20px;
-    height: 320px;
+  .theater-center-player {
+    order: 1;
+    width: 100%;
+    max-width: 360px;
+    aspect-ratio: 9 / 16;
+    height: auto;
+    margin: 0 auto;
   }
 
   .portrait-player-frame {
-    height: 560px;
-    max-width: 100%;
+    width: 100%;
+    height: 100%;
+  }
+
+  .theater-right-episodes {
+    order: 2;
+    border-left: none;
+    border-top: 1px solid var(--line);
+    padding-left: 0;
+    padding-top: 16px;
+    height: 280px;
+  }
+
+  .theater-left-info {
+    order: 3;
+    border-right: none;
+    border-top: 1px solid var(--line);
+    padding-right: 0;
+    padding-top: 16px;
+    height: auto;
   }
 
   .drama-info-grid {

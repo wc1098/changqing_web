@@ -17,7 +17,7 @@ export default async function RootLayout(props: {
   const isRtl = locale === 'ar'
 
   return (
-    <html lang={locale} dir={isRtl ? 'rtl' : 'ltr'}>
+    <html lang={locale} dir={isRtl ? 'rtl' : 'ltr'} data-scroll-behavior="smooth">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

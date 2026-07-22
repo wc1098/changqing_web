@@ -320,6 +320,7 @@ export default function DramaDetailClient({ locale, drama, episodes }: DramaDeta
         <div className="theater-left-info">
           {drama.poster?.url && (
             <div className="theater-poster-wrapper">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={drama.poster.url} alt={drama.title} className="theater-poster-img" />
             </div>
           )}
