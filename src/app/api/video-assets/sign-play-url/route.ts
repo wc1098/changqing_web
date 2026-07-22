@@ -1,13 +1,26 @@
 import { getPayload } from 'payload'
 import configPromise from '@/payload.config'
-import { headers } from 'next/headers'
+import { headers, cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function GET(req: Request) {
   try {
     const payload = await getPayload({ config: configPromise })
     const authHeaders = await headers()
-    const { user } = await payload.auth({ headers: authHeaders })
+    let { user } = await payload.auth({ headers: authHeaders })
+
+    if (!user) {
+      const cookieStore = await cookies()
+      const clientToken = cookieStore.get('client-payload-token')?.value
+      if (clientToken) {
+        const authRes = await payload.auth({
+          headers: new Headers({
+            Authorization: `JWT ${clientToken}`,
+          }),
+        })
+        user = authRes.user
+      }
+    }
 
     const url = new URL(req.url)
     const episodeId = url.searchParams.get('episodeId')

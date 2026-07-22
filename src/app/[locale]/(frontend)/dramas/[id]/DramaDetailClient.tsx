@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { AlertTriangle, Zap, LogOut, Lock, FileText, ShieldCheck, Share2 } from 'lucide-react'
+import { AlertTriangle, LogOut, Lock, FileText, ShieldCheck, Share2 } from 'lucide-react'
 import VideoPlayer from './VideoPlayer'
 
 const translations = {
@@ -313,72 +313,99 @@ export default function DramaDetailClient({ locale, drama, episodes }: DramaDeta
 
   return (
     <div className="drama-detail-layout">
-      {/* Upper Area: Video Player & Episode List */}
-      <div className="drama-player-container glass-panel">
-        <div className="player-left-main">
-          {canPlayActiveEpisode ? (
-            <div className="video-player-wrapper">
-              {fetchUrlLoading ? (
-                <div className="player-message-overlay">
-                  <div className="spinner" />
-                  <p>{t.loading}</p>
-                </div>
-              ) : errorMsg ? (
-                <div className="player-message-overlay error">
-                  <AlertTriangle size={24} color="var(--gold)" />
-                  <p>{errorMsg}</p>
-                </div>
-              ) : signedUrlData ? (
-                <div className="player-active-screen">
+      {/* 3-Column Theater Section */}
+      <div className="drama-theater-container glass-panel">
+        
+        {/* Left Column: Drama Metadata & Poster */}
+        <div className="theater-left-info">
+          {drama.poster?.url && (
+            <div className="theater-poster-wrapper">
+              <img src={drama.poster.url} alt={drama.title} className="theater-poster-img" />
+            </div>
+          )}
+          <h2 className="theater-drama-title">{drama.title}</h2>
+          <div className="theater-tags-row">
+            {drama.genres?.map(g => (
+              <span key={g.id} className="badge gold-badge">{g.name}</span>
+            ))}
+            {drama.languages?.map(l => (
+              <span key={l.id} className="badge outline-badge">{l.name}</span>
+            ))}
+          </div>
+
+          <div className="theater-meta-specs">
+            <div className="meta-spec-item">
+              <span className="spec-label">{t.code}:</span>
+              <strong className="spec-val">{drama.code}</strong>
+            </div>
+            <div className="meta-spec-item">
+              <span className="spec-label">{t.epCount}:</span>
+              <strong className="spec-val">{drama.episodeCount} {t.sec ? '集' : 'EP'}</strong>
+            </div>
+            {drama.rights?.rightsOwner && (
+              <div className="meta-spec-item">
+                <span className="spec-label">{t.rightsOwner}:</span>
+                <strong className="spec-val">{drama.rights.rightsOwner}</strong>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Center Column: 9:16 Vertical Short Drama Theater Player */}
+        <div className="theater-center-player">
+          <div className="portrait-player-frame">
+            {canPlayActiveEpisode ? (
+              <div className="video-player-wrapper">
+                {fetchUrlLoading ? (
+                  <div className="player-message-overlay">
+                    <div className="spinner" />
+                    <p>{t.loading}</p>
+                  </div>
+                ) : errorMsg ? (
+                  <div className="player-message-overlay error">
+                    <AlertTriangle size={24} color="var(--gold)" />
+                    <p>{errorMsg}</p>
+                  </div>
+                ) : signedUrlData ? (
                   <VideoPlayer 
                     url={signedUrlData.url}
                     format={signedUrlData.format}
-                    poster={drama.poster?.url || ''}
-                    clientEmail={currentUser?.email || 'Guest Preview'}
                   />
-                  <div className="signed-url-meta">
-                    <p className="url-banner" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Zap size={14} color="var(--gold-light)" /> {t.playStatusReady}</p>
-                    <div className="meta-grid">
-                      <div>{t.duration}: <strong>{signedUrlData.duration || activeEpisode?.duration || '120'} {t.sec}</strong></div>
-                      <div>{t.provider}: <strong>{signedUrlData.provider || 'Aliyun OSS'}</strong></div>
-                      <div>{t.transcode}: <strong>{signedUrlData.transcodeStatus || 'Ready'}</strong></div>
-                    </div>
+                ) : (
+                  <div className="player-message-overlay">
+                    <p>{t.watchNow}</p>
                   </div>
-                </div>
-              ) : (
-                <div className="player-message-overlay">
-                  <p>{t.watchNow}</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div 
-              className="player-locked-preview" 
-              style={{ 
-                width: '100%', 
-                height: '100%', 
-                position: 'relative', 
-                cursor: 'pointer',
-                backgroundImage: drama.poster?.url ? `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${drama.poster.url})` : 'linear-gradient(135deg, #11151a, #07090c)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                display: 'grid',
-                placeItems: 'center'
-              }}
-              onClick={() => setLoginModalOpen(true)}
-            >
-              <div style={{ textAlign: 'center' }}>
-                <div className="play-button-trigger-glow">▶</div>
-                <p style={{ marginTop: '15px', fontSize: '14px', color: 'var(--gold-light)', letterSpacing: '0.05em' }}>
-                  {t.watchNow}
-                </p>
+                )}
               </div>
-            </div>
-          )}
+            ) : (
+              <div 
+                className="player-locked-preview" 
+                style={{ 
+                  width: '100%', 
+                  height: '100%', 
+                  position: 'relative', 
+                  cursor: 'pointer',
+                  backgroundImage: drama.poster?.url ? `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${drama.poster.url})` : 'linear-gradient(135deg, #11151a, #07090c)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  display: 'grid',
+                  placeItems: 'center'
+                }}
+                onClick={() => setLoginModalOpen(true)}
+              >
+                <div style={{ textAlign: 'center' }}>
+                  <div className="play-button-trigger-glow">▶</div>
+                  <p style={{ marginTop: '15px', fontSize: '14px', color: 'var(--gold-light)', letterSpacing: '0.05em' }}>
+                    {t.watchNow}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Right Sidebar: Episode Selector */}
-        <div className="player-right-sidebar">
+        {/* Right Column: Episode Selector */}
+        <div className="theater-right-episodes">
           <h3>{t.epListTitle}</h3>
           <div className="episodes-list-scroll">
             {episodes.map((ep) => {
@@ -444,44 +471,44 @@ export default function DramaDetailClient({ locale, drama, episodes }: DramaDeta
         </div>
       )}
 
-      {/* Lower Area: Info Panels */}
+      {/* Lower Area: Synopsis & B2B Distribution Licensing */}
       <div className="drama-info-grid">
         <div className="info-main glass-panel">
-          <h1>{drama.title}</h1>
-          <p className="summary-p">{drama.summary}</p>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><FileText size={18} color="var(--gold-light)" /> {t.detailsTitle}</h3>
+          
+          {drama.summary && (
+            <div className="summary-section-box" style={{ marginTop: '14px', color: 'var(--muted)', fontSize: '13.5px', lineHeight: '1.7' }}>
+              <p>{drama.summary}</p>
+            </div>
+          )}
 
-          <div className="specs-section">
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}><FileText size={18} color="var(--gold-light)" /> {t.detailsTitle}</h3>
+          <div className="specs-section" style={{ marginTop: '16px', borderTop: '1px solid var(--line)', paddingTop: '14px' }}>
             <table className="specs-table">
               <tbody>
                 <tr>
-                  <td>{t.code}</td>
-                  <td><strong>{drama.code}</strong></td>
-                </tr>
-                <tr>
-                  <td>{t.epCount}</td>
-                  <td>{drama.episodeCount}</td>
-                </tr>
-                <tr>
-                  <td>{t.genres}</td>
-                  <td>{drama.genres?.map((g) => g.name).join(', ')}</td>
-                </tr>
-                <tr>
-                  <td>{t.langs}</td>
-                  <td>{drama.languages?.map((l) => l.name).join(', ')}</td>
-                </tr>
-                <tr>
                   <td>{t.markets}</td>
-                  <td>{drama.markets?.map((m) => m.name).join(', ')}</td>
+                  <td>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {drama.markets?.map(m => (
+                        <span key={m.id} className="badge outline-badge">{m.name}</span>
+                      )) || '-'}
+                    </div>
+                  </td>
                 </tr>
                 <tr>
                   <td>{t.platforms}</td>
-                  <td>{drama.platforms?.map((p) => p.name).join(', ')}</td>
+                  <td>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {drama.platforms?.map(p => (
+                        <span key={p.id} className="badge gold-badge">{p.name}</span>
+                      )) || '-'}
+                    </div>
+                  </td>
                 </tr>
                 {drama.releaseDate && (
                   <tr>
                     <td>{t.releaseDate}</td>
-                    <td>{new Date(drama.releaseDate).toLocaleDateString()}</td>
+                    <td><strong>{new Date(drama.releaseDate).toLocaleDateString()}</strong></td>
                   </tr>
                 )}
               </tbody>
@@ -514,7 +541,7 @@ export default function DramaDetailClient({ locale, drama, episodes }: DramaDeta
                 <span>{t.allowedFull}: <strong>{drama.rights?.allowFullEpisodes ? t.yes : t.no}</strong></span>
               </div>
             </div>
-            
+
             <div className="share-whatsapp-wrapper" style={{ marginTop: '20px', borderTop: '1px solid var(--line)', paddingTop: '15px' }}>
               <a
                 href={`https://api.whatsapp.com/send?text=${encodeURIComponent(

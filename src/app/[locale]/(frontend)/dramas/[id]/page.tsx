@@ -119,7 +119,7 @@ export default async function DramaDetailPage(props: DramaPageProps) {
   }
 
   return (
-    <div className="page-container container-spacing">
+    <div className="page-container drama-detail-wrapper">
       {/* Inject Structured Data */}
       <script
         type="application/ld+json"

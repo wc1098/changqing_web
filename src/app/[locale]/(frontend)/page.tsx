@@ -194,6 +194,7 @@ export default async function HomePage(props: {
       },
       sort: 'sortOrder',
       limit: 24,
+      overrideAccess: true,
     })
     dbPartners = res.docs
   } catch (error) {
